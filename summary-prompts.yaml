@@ -48,10 +48,10 @@ categories:
 - Archive
 - Color
 - Edit
-- Generative (melody)
-- Generative (chords)
-- Generative (rhythm)
-- Generative (creative)
+- Generate (melody)
+- Generate (chords)
+- Generate (rhythm)
+- Generate (creative)
 - Utility
 
 category: |
@@ -68,10 +68,10 @@ category: |
     - Adust
     - Color
     - Edit
-    - Generative (melody)
-    - Generative (chords)
-    - Generative (rhythm)
-    - Generative (creative)
+    - Generate (melody)
+    - Generate (chords)
+    - Generate (rhythm)
+    - Generate (creative)
     - Utility
     |availablecategoriesend|
 
