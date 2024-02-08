@@ -18,30 +18,6 @@ client = OpenAI(api_key=dotenv_config["OPENAI_API_KEY"])
 with open('summary-prompts.yaml', 'r') as file:
   summary_prompts = yaml.safe_load(file)
 
-header_template_path = './header-spec.go.tmpl'
-
-
-def construct_header(data):
-  tmpjson = './.tmp.json'
-
-  # Convert the data to JSON because gomplate can easily parse JSON
-  data_json = json.dumps(data)
-
-  with open(tmpjson, 'w') as writer:
-    writer.write(data_json)
-
-  # Call gomplate with the data and template
-  result = subprocess.run(
-      ['gomplate', '-f', header_template_path, '-c', f'.={tmpjson}'],
-      capture_output=True,
-      text=True)
-
-  if result.returncode != 0:
-    raise Exception("Error processing template: " + result.stderr)
-
-  return result.stdout
-
-
 def version_label_from_file(f, label):
   label_regex = re.compile(r'\s*([^\.<>"]+?(?:v\d+(\.\d+)?)?)(?=\.\w+$)')
   basename = os.path.basename(f)
@@ -100,8 +76,8 @@ def step_5_header_tag():
           continue
 
         header_spec_input = HeaderSpecInputV3(
-            title=normalized_label,
-            authors=ftp.ft.posts[0].author.user_name,
+          title=normalized_label,
+          authors=ftp.ft.posts[0].author.user_name,
         )
 
         code_slice = read_first_n_lines(fpath, n=200)

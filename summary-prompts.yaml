@@ -44,7 +44,7 @@ version: |
     PROVIDE REPLY ONLY IN FORMAT: "version: ..." Or "version: no-version"
 
 categories:
-- Adust
+- Adjust
 - Archive
 - Color
 - Edit
@@ -52,6 +52,7 @@ categories:
 - Generative (chords)
 - Generative (rhythm)
 - Generative (creative)
+- Utility
 
 category: |
     This GPT is designed to analyze text from online posts on an FL Studio Pianoroll forum, specifically focusing on user-made Python scripts for FL Studio. It extracts and interprets descriptions of these scripts to categorize them into predefined categories such as Adjust, Color, Edit, Generative (melody, chords, rhythm, creative), and Utility. When provided with a post that includes the script filename, available categories, a code sample, and a description of the script, the GPT identifies the most fitting category based on the content of the description and the code sample.
