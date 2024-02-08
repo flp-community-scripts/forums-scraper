@@ -1,27 +1,8 @@
-from calendar import c
-from concurrent.futures import thread
-from distutils.cygwinccompiler import get_versions
 
-from selenium.webdriver.chrome.webdriver import WebDriver
-from selenium.webdriver.common.by import By
-from dataclasses import dataclass, asdict
-from selenium.webdriver.support.ui import WebDriverWait
 from bs4 import BeautifulSoup
-from rich.console import Console
-from rich.table import Table
 from uccommon import *
 
 import yaml
-import random
-import time
-import pickle
-import diskcache as dc
-import re
-import os
-import shutil
-import patoolib
-import subprocess
-import json
 import tiktoken
 from openai import OpenAI
 

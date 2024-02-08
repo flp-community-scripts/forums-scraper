@@ -1,15 +1,11 @@
-from concurrent.futures import thread
 from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.common.exceptions import NoSuchElementException
 
-from bs4 import BeautifulSoup
 
 import random
 import time
 import diskcache as dc
-import re
 from uccommon import *
 
 

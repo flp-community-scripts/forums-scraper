@@ -1,6 +1,6 @@
 import pickle
 import re
-from dataclasses import dataclass, asdict, fields, field
+from dataclasses import dataclass, field
 from typing import Optional
 
 
