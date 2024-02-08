@@ -17,15 +17,16 @@ import os
 import shutil
 import patoolib
 
+
 def step_4_unpack():
   cache = dc.Cache('./cache.db')
 
   for k in cache.iterkeys():
     if not k.startswith('pthread'):
       continue
-    
+
     ftp: ForumThreadProcessed = deserialize(cache.get(k))
-    
+
     vbasepath = './versions'
     abasepath = './archives'
     dbasepath = './downloads'
@@ -40,18 +41,17 @@ def step_4_unpack():
 
       afpath = f'{apath}/{v.file_name}'
 
-      shutil.copy2(
-        f'{dbasepath}/{v.file_name}',
-        afpath)
-      
+      shutil.copy2(f'{dbasepath}/{v.file_name}', afpath)
+
       # Extract
-      
+
       vpath = f'{vbasepath}/{v.label}/'
       os.makedirs(vpath, exist_ok=True)
 
       patoolib.extract_archive(afpath, outdir=vpath)
-    
+
   cache.close()
+
 
 if __name__ == '__main__':
 

@@ -3,10 +3,12 @@ import re
 from dataclasses import dataclass, asdict, fields, field
 from typing import Optional
 
+
 @dataclass
 class Author:
   user_id: str
   user_name: str
+
 
 @dataclass
 class ThreadPost:
@@ -16,11 +18,13 @@ class ThreadPost:
   attachbox_html: str
   timestamp: str
 
+
 @dataclass
 class ForumThread:
   thread_id: int
   title: str
   posts: list
+
 
 @dataclass
 class VersionProcessed:
@@ -28,9 +32,11 @@ class VersionProcessed:
   label: str
   link: str
 
+
 @dataclass
 class ThreadPostProcessed:
   post: ThreadPost
+
 
 @dataclass
 class ForumThreadProcessed:
@@ -38,7 +44,8 @@ class ForumThreadProcessed:
   ft: ForumThread
   processed_posts: list
   versions: [VersionProcessed]
-  
+
+
 @dataclass
 class HeaderSpecInputV3:
   title: str
@@ -63,13 +70,16 @@ class ThreadVersionSummary:
 def serialize(obj):
   return pickle.dumps(obj)
 
+
 # Function to deserialize an object
 def deserialize(serialized_obj):
   return pickle.loads(serialized_obj)
 
+
 def store_thread(cache, ft):
   cache.set(f"thread-{str(ft.thread_id)}", serialize(ft))
-  
+
+
 def get_thread(cache, thread_id):
   v = cache.get(f"thread-{str(thread_id)}")
   return deserialize(v) if v is not None else None
@@ -77,25 +87,30 @@ def get_thread(cache, thread_id):
 
 def store_thread_processed(cache, ft):
   cache.set(f"pthread-{str(ft.thread_id)}", serialize(ft))
-  
+
+
 def get_thread_processed(cache, thread_id):
   v = cache.get(f"pthread-{str(thread_id)}")
   return deserialize(v) if v is not None else None
 
+
 def store_thread_summary(cache, ft):
   cache.set(f"tsthread-{str(ft.thread_id)}", serialize(ft))
-  
+
+
 def get_thread_summary(cache, thread_id):
   v = cache.get(f"tsthread-{str(thread_id)}")
   return deserialize(v) if v is not None else None
 
+
 def extract_thread_id_from_url(url):
-    match = re.search(r't=(\d+)', url)
-    if match:
-        return int(match.group(1))
-    else:
-        return None  # or a default value or raise an error
-    
+  match = re.search(r't=(\d+)', url)
+  if match:
+    return int(match.group(1))
+  else:
+    return None  # or a default value or raise an error
+
+
 def read_first_n_lines(file_path, n):
   """
   Reads the first n lines of a file and returns them as a string without loading the entire file into memory.
@@ -116,8 +131,10 @@ def read_first_n_lines(file_path, n):
         break
   return ''.join(lines)
 
+
 # Define the pattern to search for
 flp_pattern = re.compile(r'"""flp.*?"""', re.DOTALL)
+
 
 # Function to check if the pattern exists in the file
 def check_flp_header_in_file(file_path):
@@ -128,11 +145,13 @@ def check_flp_header_in_file(file_path):
     else:
       return False
 
+
 def prepend_string_to_file(file_path, string_to_prepend):
   # Step 1: Open the original file and read its contents
   with open(file_path, 'r') as file:
     original_content = file.read()
-  
+
   # Step 2 & 3: Open the file in write mode and prepend the string
   with open(file_path, 'w') as file:
-    file.write(string_to_prepend + '\n' + original_content)  # Adding a newline for separation
+    file.write(string_to_prepend + '\n' +
+               original_content)  # Adding a newline for separation
