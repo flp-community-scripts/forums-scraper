@@ -189,24 +189,65 @@ def extract_flp_block_from_file(file_path) -> Optional[str]:
     return None
 
 def parse_text_to_headerinput(text):
+  flp_block_pattern = re.compile(r'"""flp(.*?)"""', re.DOTALL)
+  match = flp_block_pattern.search(text)
+  if not match:
+    return None  # No flp block found
+
+  flp_block_content = match.group(1).strip()  # Get the content without the flp markers
+
   parsed_data = {}
-  lines = text.strip().split("\n")
   current_key = None
 
   # Create a mapping from real_label to field name
   real_label_map = {field.metadata["real_label"]: field.name for field in fields(HeaderSpecInputV3) if "real_label" in field.metadata}
 
+  lines = flp_block_content.split("\n")
+
   for line in lines:
-    # Check if the line corresponds to any real_label
+    found_key = False
     for real_label, field_name in real_label_map.items():
       if line.startswith(real_label + ":"):
         current_key = field_name
         _, _, initial_value = line.partition(": ")
         parsed_data[current_key] = initial_value.strip()
+        found_key = True
         break
-    else:
-      if current_key:
-        parsed_data[current_key] += line.strip()
+
+    if not found_key and current_key:
+      # Trim leading and trailing whitespace from the line
+      line_content = line.strip()
+      # Only append the line if it's not empty, avoiding unnecessary newlines
+      if line_content:
+        # Append with a space if content already exists, otherwise just set it
+        if parsed_data[current_key]:
+          parsed_data[current_key] += " " + line_content
+        else:
+          parsed_data[current_key] = line_content
+
+  return HeaderSpecInputV3(**{field.name: parsed_data.get(field.name, None) for field in fields(HeaderSpecInputV3)})
+
+# def parse_text_to_headerinput(text):
+#   parsed_data = {}
+#   lines = text.strip().split("\n")
+#   current_key = None
+
+#   # Create a mapping from real_label to field name
+#   real_label_map = {field.metadata["real_label"]: field.name for field in fields(HeaderSpecInputV3) if "real_label" in field.metadata}
+
+#   for line in lines:
+#     # Check if the line corresponds to any real_label
+#     for real_label, field_name in real_label_map.items():
+#       if line.startswith(real_label + ":"):
+#         current_key = field_name
+#         _, _, initial_value = line.partition(": ")
+#         parsed_data[current_key] = initial_value.strip()
+#         break
+#     else:
+#       if current_key in parsed_data:
+#         parsed_data[current_key] += "\n" + line.strip()
+#       else:
+#         parsed_data[current_key] = line.strip()
 
   # Initialize the dataclass with parsed data, using default None for missing fields
   return HeaderSpecInputV3(**{field.name: parsed_data.get(field.name) for field in fields(HeaderSpecInputV3)})
