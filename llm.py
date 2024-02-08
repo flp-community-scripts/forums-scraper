@@ -23,26 +23,48 @@ import shutil
 import patoolib
 import subprocess
 import json
+import tiktoken
 from openai import OpenAI
 
 from dotenv import dotenv_values
+
 dotenv_config = dotenv_values(".env")
 client = OpenAI(api_key=dotenv_config["OPENAI_API_KEY"])
 
 with open('summary-prompts.yaml', 'r') as file:
   summary_prompts = yaml.safe_load(file)
 
-def process_prompt_oneshot(
-  input: str,
-  system_prompt: str,
-  temperature=0
-):
-  response = client.chat.completions.create(model="gpt-3.5-turbo",  # Replace with your desired model
-  messages=[
-    {"role": "system", "content": system_prompt },
-    {"role": "user", "content": input }
-  ],
-  temperature=temperature)
+smaller_model = "gpt-3.5-turbo"
+smaller_model_limit = 4096
+larger_model = "gpt-3.5-turbo-16k"
+conditionally_use_larger_model = True
+
+tiktokenizer = tiktoken.encoding_for_model(smaller_model)
+
+
+def count_small_model_tokens(t):
+  return len(tiktokenizer.encode(t))
+
+
+def process_prompt_oneshot(input: str, system_prompt: str, temperature=0):
+  model = smaller_model
+
+  if conditionally_use_larger_model:
+    tokens = count_small_model_tokens(system_prompt + input) + 12
+
+    if tokens > smaller_model_limit:
+      model = larger_model
+
+  response = client.chat.completions.create(
+      model=model,  # Replace with your desired model
+      messages=[{
+          "role": "system",
+          "content": system_prompt
+      }, {
+          "role": "user",
+          "content": input
+      }],
+      temperature=temperature)
   response = response.choices[0].message.content
 
   return response
