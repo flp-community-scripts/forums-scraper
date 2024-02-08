@@ -1,4 +1,4 @@
-# Community Crawler
+# Community Scraper
 
 **Will take all old posts in fl piano roll forums and attempt to reindex them with some basic filtering logic and gpt as well**
 
