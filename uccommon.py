@@ -1,5 +1,6 @@
 import pickle
 import re
+import os
 from dataclasses import dataclass, field
 from typing import Optional
 
@@ -155,3 +156,11 @@ def prepend_string_to_file(file_path, string_to_prepend):
   with open(file_path, 'w') as file:
     file.write(string_to_prepend + '\n' +
                original_content)  # Adding a newline for separation
+
+
+def list_files_recursive(path):
+  file_paths = []  # List to store file paths
+  for root, _, files in os.walk(path):
+    for file in files:
+      file_paths.append(os.path.relpath(os.path.join(root, file), start=path))
+  return file_paths

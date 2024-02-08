@@ -1,5 +1,4 @@
-
-from dataclasses import asdict
+from dataclasses import asdict, fields
 from uccommon import *
 
 import yaml
@@ -41,14 +40,6 @@ def construct_header(data):
     raise Exception("Error processing template: " + result.stderr)
 
   return result.stdout
-
-
-def list_files_recursive(path):
-  file_paths = []  # List to store file paths
-  for root, _, files in os.walk(path):
-    for file in files:
-      file_paths.append(os.path.relpath(os.path.join(root, file), start=path))
-  return file_paths
 
 
 def version_label_from_file(f, label):
