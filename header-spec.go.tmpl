@@ -1,0 +1,14 @@
+"""flp
+Title: {{ .title }}
+Author: {{ or (index . "authors") "(n/a)" }}
+Category: {{ or (index . "category") "(n/a)" }}
+Version: {{ or (index . "version") "(n/a)" }}
+{{ if index . "license" -}}
+License: {{ .license }}
+{{ end }}{{ if index . "description" }}
+Description: 
+{{ .description }}
+{{ end }}{{ if index . "changelog" }}
+Changelog:
+{{ .changelog }}
+{{ end }}"""

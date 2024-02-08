@@ -1,0 +1,9 @@
+.env
+node_modules
+*.db
+chromedriver
+downloads/*
+versions/*
+archives/*
+__pycache__
+.tmp.json
