@@ -40,9 +40,9 @@ mirroring to flp-community-repo:
 
 ```python3 step_6_stage.py```
 
-Copy over to so called staging folder that will look similar to `flp-community-repo`
+> Copy over to so called staging folder that will look similar to `flp-community-repo`
 
-(Since some files will be incorrectly categorised simply takes copy-paste folders from `flp-community-repo` to `staging-order-memo/`)
+(Since some files will be incorrectly categorised, simply take copy-paste folders from `flp-community-repo` to `staging-order-memo/`)
 
 If you wanna reorder some scripts manually, place then in respective folder and then run: `step_7_conform_stage.py`
 
