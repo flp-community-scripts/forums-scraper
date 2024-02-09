@@ -4,6 +4,8 @@ import json
 import subprocess
 import os
 import shutil
+import textwrap
+import chardet
 from dataclasses import dataclass, field, fields, asdict
 from typing import Optional
 
@@ -54,6 +56,8 @@ class ForumThreadProcessed:
 class HeaderSpecInputV3:
   title: str = field(metadata={"real_label": "Title"})
   authors: str = field(metadata={"real_label": "Author"})
+
+  thread_link: Optional[str] = field(default=None, metadata={"real_label": "Thread Link"})
 
   category: Optional[str] = field(default=None, metadata={"prompt": True, "real_label": "Category"})
   description: Optional[str] = field(default=None, metadata={"prompt": True, "real_label": "Description"})
@@ -113,10 +117,10 @@ def extract_thread_id_from_url(url):
   else:
     return None  # or a default value or raise an error
 
-
-def read_first_n_lines(file_path, n):
+def read_first_n_lines(file_path, n=200):
   """
-  Reads the first n lines of a file and returns them as a string without loading the entire file into memory.
+  Reads the first n lines of a file, assuming UTF-8 encoding, and returns them as a string.
+  Unknown characters are replaced with '?'.
 
   Parameters:
   file_path (str): Path to the file to be read.
@@ -126,14 +130,13 @@ def read_first_n_lines(file_path, n):
   str: The first n lines of the file as a single string.
   """
   lines = []
-  with open(file_path, 'r') as file:
+  with open(file_path, 'r', encoding='utf-8', errors='replace') as file:
     for i, line in enumerate(file):
       if i < n:
         lines.append(line)
       else:
         break
   return ''.join(lines)
-
 
 # Define the pattern to search for
 flp_pattern = re.compile(r'"""flp.*?"""', re.DOTALL)
@@ -296,3 +299,57 @@ def update_or_prepend_flp_block(file_path, header_spec_input):
   
   with open(file_path, 'w', encoding='utf-8') as file:
     file.write(updated_content)
+
+# def version_label_from_file(f, label):
+#   label_regex = re.compile(r'\s*([^\.<>"]+?(?:v\d+(\.\d+)?)?)(?=\.\w+$)')
+#   basename = os.path.basename(f)
+#   label_match = label_regex.match(basename)
+#   if label_match:
+#     return label_match.group(1)
+#   else:
+#     return label
+
+# def version_label_from_file(f, default_label):
+#   # Updated regex to capture more complex filename structures, including version numbers and descriptive text
+#   label_regex = re.compile(r'\s*(.*?)\s*(v\d+(\.\d+)?\s*(.*?))?(?=\.\w+$)')
+#   basename = os.path.basename(f)
+#   label_match = label_regex.match(basename)
+#   if label_match:
+#     # Concatenate the base name and version number if present, including any additional descriptive text
+#     base_name = label_match.group(1).strip()
+#     version = label_match.group(2) if label_match.group(2) else ""
+#     additional_text = label_match.group(4).strip() if label_match.group(4) else ""
+#     full_label = f"{base_name} {version} {additional_text}".strip()
+#     return full_label
+#   else:
+#     return default_label
+
+def version_label_from_file(f, default_label):
+  # Improved regex to exclude multiple file extensions using negative lookahead to preserve version numbers
+  label_regex = re.compile(r'''
+    ^                               # Start of the string
+    (.+?)                           # Non-greedy capture of the initial part of the filename, potentially including version
+    ((?:\.\d+)+)?                   # Optionally capturing version numbers as '.number'
+    (?=                             # Start of positive lookahead for file extension(s)
+      (?:\.\w+)+                  # Non-capturing group for one or more '.word' sequences at the end
+      $                           # End of the string
+    )
+  ''', re.VERBOSE)
+
+  basename = os.path.basename(f)  # Extract the basename
+  label_match = label_regex.match(basename)
+  
+  if label_match:
+    # Concatenate base name and version number, if present
+    full_label = f"{label_match.group(1)}{label_match.group(2) or ''}".strip()
+    return full_label
+  else:
+    # If regex match fails, fallback to using the default label without change
+    return default_label
+
+def fill_preserving_newlines(text, width=80):
+  """Wrap text with preservation of existing newlines."""
+  lines = text.split('\n')  # Split the text into lines
+  wrapped_lines = [textwrap.fill(line, width=width) for line in lines]  # Wrap each line
+  return '\n'.join(wrapped_lines)  # Combine wrapped lines, preserving original newlines
+

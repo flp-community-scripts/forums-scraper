@@ -97,8 +97,12 @@ def prompt_changelog(ftp: ForumThreadProcessed,
   original_post = ftp.ft.posts[0].content_html
   soup = BeautifulSoup(original_post, "html.parser")
 
-  return process_prompt_oneshot(soup.get_text(), summary_prompts['changelog'])
+  creply = process_prompt_oneshot(soup.get_text(), summary_prompts['changelog'])
+  
+  if "no changelog" in creply and len(creply) < 100:
+    return None
 
+  return creply
 
 def prompt_category(ftp: ForumThreadProcessed,
                     header_spec_input: HeaderSpecInputV3, code_slice: str,

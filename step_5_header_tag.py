@@ -9,6 +9,7 @@ import subprocess
 import json
 from openai import OpenAI
 import llm
+import textwrap
 
 from dotenv import dotenv_values
 
@@ -17,16 +18,6 @@ client = OpenAI(api_key=dotenv_config["OPENAI_API_KEY"])
 
 with open('summary-prompts.yaml', 'r') as file:
   summary_prompts = yaml.safe_load(file)
-
-def version_label_from_file(f, label):
-  label_regex = re.compile(r'\s*([^\.<>"]+?(?:v\d+(\.\d+)?)?)(?=\.\w+$)')
-  basename = os.path.basename(f)
-  label_match = label_regex.match(basename)
-  if label_match:
-    return label_match.group(1)
-  else:
-    return label
-
 
 def pick_version_label(f, v, d=' / '):
   l = version_label_from_file(f, None)
@@ -60,10 +51,8 @@ def step_5_header_tag():
     ftp: ForumThreadProcessed = deserialize(cache.get(k))
 
     vbasepath = './versions'
-    # print('---- k')
     for v in ftp.versions:
       vpath = f'{vbasepath}/{v.label}'
-      # print('-- v')
 
       labels = [(pick_version_label(f, v, d=' / '), f)
                 for f in list_files_recursive(vpath)]
@@ -78,6 +67,7 @@ def step_5_header_tag():
         header_spec_input = HeaderSpecInputV3(
           title=normalized_label,
           authors=ftp.ft.posts[0].author.user_name,
+          thread_link=f"https://forum.image-line.com/viewtopic.php?t={ftp.thread_id}"
         )
 
         code_slice = read_first_n_lines(fpath, n=200)
@@ -86,6 +76,17 @@ def step_5_header_tag():
                    ftp=ftp,
                    code_slice=code_slice,
                    labels=labels)
+        
+        if header_spec_input.description:
+          header_spec_input.description = fill_preserving_newlines(
+            header_spec_input.description, 80)
+
+        if header_spec_input.changelog:
+          header_spec_input.changelog = fill_preserving_newlines(
+            header_spec_input.changelog, 80)
+          
+        if not header_spec_input.license:
+          header_spec_input.license = "Unknown"
 
         flpheader = construct_header(asdict(header_spec_input))
 

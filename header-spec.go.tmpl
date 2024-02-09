@@ -1,8 +1,8 @@
 """flp
 Title: {{ .title }}
-Author: {{ or (index . "authors") "(n/a)" }}
-Category: {{ or (index . "category") "(n/a)" }}
-Version: {{ or (index . "version") "(n/a)" }}
+Author: {{ or (index . "authors") "Unkown" }}
+Category: {{ or (index . "category") "Unknown" }}
+Version: {{ or (index . "version") "Unknown" }}
 {{ if index . "license" -}}
 License: {{ .license }}
 {{ end }}{{ if index . "description" }}
@@ -11,4 +11,6 @@ Description:
 {{ end }}{{ if index . "changelog" }}
 Changelog:
 {{ .changelog }}
+{{ end }}{{ if index . "thread_link" }}
+Thread Link: {{ .thread_link }}
 {{ end }}"""

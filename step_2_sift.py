@@ -2,6 +2,7 @@ from bs4 import BeautifulSoup
 from rich.console import Console
 from rich.table import Table
 from uccommon import *
+from typing import List
 
 import pickle
 import diskcache as dc
@@ -72,10 +73,61 @@ def sift_versions(input_lists):
       if label_match:
         label = label_match.group(1).strip()
 
+        if '...' not in label:
+          versions.append(
+              VersionProcessed(label=label,
+                               link=full_link,
+                               file_name=item[1].strip()))
+
+  return versions
+
+def clean_file_name(url):
+  """Extracts the clean file name from a URL."""
+  # Extract the last segment after the last '/' and strip leading/trailing spaces
+  return url.split('/')[-1].strip()
+
+
+def preprocess_file_name(s):
+  """Extracts the file name from a complex string potentially containing a URL or path."""
+  # Regex pattern to match a URL or a filepath ending with a common file extension
+  pattern = re.compile(r'(?:http[s]?://)?[\w./-]+?/([\w.-]+\.(?:pyscript|zip|rar|txt|py))', re.IGNORECASE)
+  match = pattern.search(s)
+  if match:
+    # Return the basename part of the matched URL/filepath
+    return os.path.basename(match.group(1).strip())
+  else:
+    return s
+    # If no URL/filepath is detected, return a cleaned-up version of the original string
+    # return os.path.basename(s.strip())
+
+def sift_versions_with_direct_links(input_lists: List[List[str]]):
+  base_url = "https://forum.image-line.com"
+  versions = []
+
+  # Regex to capture the download link
+  link_regex = re.compile(r'href="((?:http[s]?://.*?|(?:\./)?download/file\.php\?id=\d+))"')
+
+  for item in input_lists:
+    # Flatten the item list into a single string to search for links
+    item_str = ' '.join(item)
+    link_match = link_regex.search(item_str)
+    
+    if link_match:
+      link = link_match.group(1)
+      # Adjust link for relative URLs to prepend base_url
+      full_link = link if link.startswith('http') else base_url + link[1:]  # Remove leading '.' for relative paths
+
+      file_name = preprocess_file_name(item[1]).strip()
+      # Extract label from the cleaned file name
+      label = version_label_from_file(file_name, file_name)
+
+      if "..." not in label:
+        if ".zip" in label:
+          print('Failed to parse version label:', label.strip(), file_name)
         versions.append(
-            VersionProcessed(label=label,
-                             link=full_link,
-                             file_name=item[1].strip()))
+          VersionProcessed(label=label.strip(),
+                           link=full_link,
+                           file_name=file_name))
 
   return versions
 
@@ -102,13 +154,13 @@ def step_2_sift():
     st = ft.title.lower()
 
     title_ignore_patterns = [
-        'request', 'req', 'demo', 'meme', 'question', 'to all', '\sme\s',
-        'GoldenPond'
+      'request', 'req', 'demo', 'meme', 'question', 'to all', '\sme\s',
+      # 'GoldenPond'
     ]
 
     ignore_authors = [
-        'BinaryBorn',
-        'cableerector',
+      'BinaryBorn',
+      'cableerector',
     ]
 
     if any([re.search(p.lower(), st) for p in title_ignore_patterns]):
@@ -170,18 +222,17 @@ def step_2_sift():
 
     tpp0 = ThreadPostProcessed(post=ft.posts[0])
 
-    # print(files)
-    # print(files)
-    versions = sift_versions(files)
+    versions = sift_versions_with_direct_links(files)
+    # print(versions)
 
     ftp = ForumThreadProcessed(thread_id=ft.thread_id,
-                               versions=versions,
+                  versions=versions,
                                ft=ft,
                                processed_posts=[tpp0])
 
     store_thread_processed(cache, ftp)
     # print(get_thread_processed(cache, ftp.thread_id))
-    print(ft.thread_id, versions)
+    # print(ft.title)
 
     i += 1
 

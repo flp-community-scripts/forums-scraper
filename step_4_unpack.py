@@ -23,7 +23,6 @@ def step_4_unpack():
     os.makedirs(abasepath, exist_ok=True)
 
     for v in ftp.versions:
-      # Archives
       apath = f'{abasepath}/{v.label}'
       os.makedirs(apath, exist_ok=True)
 
@@ -36,7 +35,10 @@ def step_4_unpack():
       vpath = f'{vbasepath}/{v.label}/'
       os.makedirs(vpath, exist_ok=True)
 
-      patoolib.extract_archive(afpath, outdir=vpath)
+      try:
+        patoolib.extract_archive(afpath, outdir=vpath)
+      except Exception as e:
+        print(e)
 
   cache.close()
 

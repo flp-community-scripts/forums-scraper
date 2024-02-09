@@ -12,3 +12,4 @@ pyyaml==6.0.1
 ipython==8.12.3
 tiktoken==2.31.0
 autoflake==2.2.1
+chardet==5.2.0
