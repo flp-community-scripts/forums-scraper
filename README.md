@@ -32,7 +32,11 @@ then:
 
 ```python3 step_4_unpack.py```
 
+> folder archives will be created, not everything will unpack and not everything will actually be valid output, so verify anyways
+
 ```python3 step_5_header_tag.py```
+
+> folder versions will be created, with standardised header summaries and stuff, will take time, runs gpt for summary and everything text, again verify outputs
 
 now everything is labelled and stored in versions folder.
 
