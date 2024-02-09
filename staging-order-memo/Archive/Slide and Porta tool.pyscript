@@ -1,0 +1,71 @@
+"""flp
+Title: Slide and Porta scripts / Slide and Porta tool
+Author: Pierre Sosa
+Category: Archive
+Version: Unknown
+License: Unknown
+
+Description: 
+1) Slide selected notes (no GUI): This script allows you to activate
+slide/portamento for selected notes without deactivating it.
+2) Slide toggle selected notes (no GUI): This script works as a toggle,
+activating slide/portamento for "normal" notes and deactivating it if the notes
+are already in slide/portamento mode.
+3) Porta selected notes (no GUI): This script activates portamento for selected
+notes without deactivating it.
+4) Porta toggle selected notes (no GUI): Similar to the second script, this
+script toggles portamento for "normal" notes and deactivates it if the notes are
+already in portamento mode.
+5) Deactivate Slide/Porta of selected notes (no GUI): This script deactivates
+slide/portamento for selected notes.
+6) Slide/Porta tool (with GUI): This script provides a graphical user interface
+(GUI) for controlling slide/portamento, including options for inverting the
+effect. Additionally, slide and porta toggle scripts have been added in the
+latest update.
+
+Changelog:
+2023-02-07
+- Added invert options for Slide / Porta tool
+- Added slide and porta toggle scripts
+
+Thread Link: https://forum.image-line.com/viewtopic.php?t=307308
+"""
+import flpianoroll as flp
+
+def createDialog():
+	Form = flp.ScriptDialog("Slide / Porta Tools", "Activates / inverts Slide / Porta (or both) mode for selected notes (all if none is selected), or reverts notes to the default mode.\r\n" + 
+    "*** Script by Pierre Sosa ***")
+	Form.AddInputCombo("What to do?", "Slide,Porta,Both,Invert Slide,Invert Porta,Invert Both,Revert to default",0)
+	return Form
+    
+def apply(Form):
+    
+	mode = Form.GetInputValue("What to do?")
+    
+	if mode == 0:
+		for n in range(flp.score.noteCount):
+			flp.score.getNote(n).slide = True
+            
+	elif mode == 1:
+		for n in range(flp.score.noteCount):
+			flp.score.getNote(n).porta = True
+            
+	elif mode == 2:
+		for n in range(flp.score.noteCount):
+			flp.score.getNote(n).slide = True
+			flp.score.getNote(n).porta = True
+	elif mode >= 3 and mode < 6:
+		for n in range(flp.score.noteCount):
+			if mode == 3 or mode == 5:
+				if flp.score.getNote(n).slide == True:
+					flp.score.getNote(n).slide = False
+				else: flp.score.getNote(n).slide = True 
+			if mode == 4 or mode == 5:
+				if flp.score.getNote(n).porta == True:
+					flp.score.getNote(n).porta = False
+				else: flp.score.getNote(n).porta = True 			
+	else:
+		for n in range(flp.score.noteCount):
+			flp.score.getNote(n).slide = False
+			flp.score.getNote(n).porta = False
+
