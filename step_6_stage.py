@@ -42,6 +42,9 @@ for f in files:
   unique_check.add(f)
 
 staging_path = "./staging"
+
+os.makedirs(staging_path, exist_ok=True)
+
 staging_order_memo = "./staging-order-memo"
 
 if any(os.path.isfile(os.path.join(staging_path, item)) for item in os.listdir(staging_path)):

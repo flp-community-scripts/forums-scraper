@@ -144,7 +144,7 @@ flp_pattern = re.compile(r'"""flp.*?"""', re.DOTALL)
 
 # Function to check if the pattern exists in the file
 def check_flp_header_in_file(file_path):
-  with open(file_path, 'r') as file:
+  with open(file_path, 'r', errors='replace') as file:
     content = file.read()
     if flp_pattern.search(content):
       return True
@@ -154,11 +154,11 @@ def check_flp_header_in_file(file_path):
 
 def prepend_string_to_file(file_path, string_to_prepend):
   # Step 1: Open the original file and read its contents
-  with open(file_path, 'r') as file:
+  with open(file_path, 'r', errors='replace') as file:
     original_content = file.read()
 
   # Step 2 & 3: Open the file in write mode and prepend the string
-  with open(file_path, 'w') as file:
+  with open(file_path, 'w', errors='replace') as file:
     file.write(string_to_prepend + '\n' +
                original_content)  # Adding a newline for separation
 
@@ -201,59 +201,76 @@ def parse_text_to_headerinput(text):
 
   parsed_data = {}
   current_key = None
-
-  # Create a mapping from real_label to field name
   real_label_map = {field.metadata["real_label"]: field.name for field in fields(HeaderSpecInputV3) if "real_label" in field.metadata}
 
   lines = flp_block_content.split("\n")
 
   for line in lines:
-    found_key = False
+    if line.strip() == "":  # Detecting paragraph breaks
+      if current_key:
+        parsed_data[current_key] += "\n"
+      continue
+
+    # Detect field labels and assign them as current keys
+    label_detected = False
     for real_label, field_name in real_label_map.items():
       if line.startswith(real_label + ":"):
         current_key = field_name
-        _, _, initial_value = line.partition(": ")
-        parsed_data[current_key] = initial_value.strip()
-        found_key = True
+        parsed_data[current_key] = line[len(real_label) + 1:].strip()  # Skip label and colon, then trim
+        label_detected = True
         break
 
-    if not found_key and current_key:
-      # Trim leading and trailing whitespace from the line
-      line_content = line.strip()
-      # Only append the line if it's not empty, avoiding unnecessary newlines
-      if line_content:
-        # Append with a space if content already exists, otherwise just set it
-        if parsed_data[current_key]:
-          parsed_data[current_key] += " " + line_content
-        else:
-          parsed_data[current_key] = line_content
+    if not label_detected and current_key:
+      # Append the line to the current field, maintaining paragraph structure
+      if parsed_data[current_key]:  # If there's already content, prepend with a newline
+        parsed_data[current_key] += "\n" + line
+      else:
+        parsed_data[current_key] = line
+
+  # Ensure each field ends without excessive newlines
+  for key in parsed_data:
+    parsed_data[key] = parsed_data[key].strip()
 
   return HeaderSpecInputV3(**{field.name: parsed_data.get(field.name, None) for field in fields(HeaderSpecInputV3)})
 
 # def parse_text_to_headerinput(text):
+#   flp_block_pattern = re.compile(r'"""flp(.*?)"""', re.DOTALL)
+#   match = flp_block_pattern.search(text)
+#   if not match:
+#     return None  # No flp block found
+
+#   flp_block_content = match.group(1).strip()  # Get the content without the flp markers
+
 #   parsed_data = {}
-#   lines = text.strip().split("\n")
 #   current_key = None
 
 #   # Create a mapping from real_label to field name
 #   real_label_map = {field.metadata["real_label"]: field.name for field in fields(HeaderSpecInputV3) if "real_label" in field.metadata}
 
+#   lines = flp_block_content.split("\n")
+
 #   for line in lines:
-#     # Check if the line corresponds to any real_label
+#     found_key = False
 #     for real_label, field_name in real_label_map.items():
 #       if line.startswith(real_label + ":"):
 #         current_key = field_name
 #         _, _, initial_value = line.partition(": ")
 #         parsed_data[current_key] = initial_value.strip()
+#         found_key = True
 #         break
-#     else:
-#       if current_key in parsed_data:
-#         parsed_data[current_key] += "\n" + line.strip()
-#       else:
-#         parsed_data[current_key] = line.strip()
 
-  # Initialize the dataclass with parsed data, using default None for missing fields
-  return HeaderSpecInputV3(**{field.name: parsed_data.get(field.name) for field in fields(HeaderSpecInputV3)})
+#     if not found_key and current_key:
+#       # Trim leading and trailing whitespace from the line
+#       line_content = line.strip()
+#       # Only append the line if it's not empty, avoiding unnecessary newlines
+#       if line_content:
+#         # Append with a space if content already exists, otherwise just set it
+#         if parsed_data[current_key]:
+#           parsed_data[current_key] += "\n" + line_content
+#         else:
+#           parsed_data[current_key] = line_content
+
+#   return HeaderSpecInputV3(**{field.name: parsed_data.get(field.name, None) for field in fields(HeaderSpecInputV3)})
 
 def header_input_from_file(file_path):
   text = extract_flp_block_from_file(file_path)

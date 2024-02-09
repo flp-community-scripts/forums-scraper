@@ -49,7 +49,17 @@ for f in files:
     flp_header.category = cat_real
     print(f"Conforming: {src_path}")
     
-  flp_header.description = fill_preserving_newlines(flp_header.description, 80)
+  # flp_header.description = fill_preserving_newlines(flp_header.description, 80)
+
+  # if flp_header.changelog:
+  #   # flp_header.changelog = flp_header.changelog.replace(' - ', '\n- ')
+
+  #   pattern = r'(\d{4}-\d{2}-\d{2})'
+  #   replaced_text = re.sub(pattern, r'\n\1', flp_header.changelog)
+    
+  #   flp_header.changelog = replaced_text
+
+  #   flp_header.changelog = re.sub(pattern, r'\n\n\1', flp_header.changelog)
 
   update_or_prepend_flp_block(src_path, flp_header)
   
