@@ -35,3 +35,15 @@ then:
 ```python3 step_5_header_tag.py```
 
 now everything is labelled and stored in versions folder.
+
+mirroring to flp-community-repo:
+
+```python3 step_6_stage.py```
+
+Copy over to so called staging folder that will look similar to `flp-community-repo`
+
+(Since some files will be incorrectly categorised simply takes copy-paste folders from `flp-community-repo` to `staging-order-memo/`)
+
+If you wanna reorder some scripts manually, place then in respective folder and then run: `step_7_conform_stage.py`
+
+And lastly just copy over back the contents of staging folder to `flp-community-repo`, yeah for now it's manual
